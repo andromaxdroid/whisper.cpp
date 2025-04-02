@@ -81,7 +81,11 @@ Now build the [whisper-cli](examples/cli) example and transcribe an audio file l
 ```bash
 # build the project
 cmake -B build
+```
+```
 cmake --build build --config Release
+```
+```
 
 # transcribe an audio file
 ./build/bin/whisper-cli -f samples/jfk.wav
