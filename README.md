@@ -97,9 +97,11 @@ cmake --build build --config Release
 If you want auto install to termux, simply run:
 
 ```
-curl -L https://raw.githubusercontent.com/andromaxdroid/whisper.cpp/refs/heads/master/install.sh -o install.sh && bash install.sh
+curl -L https://raw.githubusercontent.com/andromaxdroid/whisper.cpp/master/install.sh -o install.sh && bash install.sh
 ```
 
+
+---
 
 For a quick demo, simply run `make base.en`.
 
