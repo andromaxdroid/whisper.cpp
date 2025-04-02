@@ -95,15 +95,24 @@ def color_print(text, color, bold=False, underline=False):
         style += Color.UNDERLINE
     print(f"{style}{color}{text}{Color.END}")
 
+
+
 def find_whisper_dir():
     possible_paths = [
-        os.path.join(os.getenv("PREFIX", ""), "lib/gnome/.lib"),
-        "/root/.lib",
-        os.path.expanduser("~/.lib"),
+        os.path.expanduser("~/.whisper"),  # Path baru
+        "/root/.whisper",
+        os.path.expanduser("~/.whisper"),
         os.path.join(os.path.dirname(os.path.abspath(__file__))),
-        "/usr/local/share/.lib",
-        "/opt/.lib"
+        "/usr/local/share/.whisper",
+        "/opt/.whisper"
     ]
+    
+    for path in possible_paths:
+        target_file = os.path.join(path, "models/download-ggml-model.sh")
+        if os.path.exists(target_file):
+            return path
+    return None
+    
     for path in possible_paths:
         if os.path.exists(os.path.join(path, "models/download-ggml-model.sh")):
             return path
@@ -345,7 +354,7 @@ def main():
     language = select_language(model)
     color_print("\nEnter number of CPU threads (default 4): ", Color.BLUE, bold=True, underline=True)
     threads = input().strip() or "4"
-    whisper_bin = os.path.join(whisper_dir, "build/bin/whisper-cli")
+    whisper_bin = os.path.join(os.getenv("PREFIX"), "bin", "whisper")
     model_path = os.path.join(whisper_dir, "models", f"ggml-{model}.bin")
     original_file = os.path.abspath(input_file)
     base_name = get_clean_base_name(original_file)
