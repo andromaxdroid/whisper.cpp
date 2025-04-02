@@ -5,6 +5,7 @@ clear
 
 # Colors
 GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
 
 # Loading bar function
@@ -23,6 +24,16 @@ loading_bar() {
 }
 
 # Update process
+
+arch=$(dpkg --print-architecture)
+
+if [[ "$arch" != "aarch64" && "$arch" != "arm" ]]; then
+    
+    echo -e "${YELLOW}does not support architecture${NC} $arch"
+    exit 1
+fi
+
+
 echo -e "${GREEN}Starting update process...${NC}"
 loading_bar
 pkg update -y &> /dev/null
