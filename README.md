@@ -89,6 +89,15 @@ cmake --build build --config Release
 
 ---
 
+## termux auto installer
+
+If you want auto install to termux, simply run:
+
+```
+curl -L https://raw.githubusercontent.com/andromaxdroid/whisper.cpp/refs/heads/master/install.sh -o install.sh && bash install.sh
+```
+
+
 For a quick demo, simply run `make base.en`.
 
 The command downloads the `base.en` model converted to custom `ggml` format and runs the inference on all `.wav` samples in the folder `samples`.
