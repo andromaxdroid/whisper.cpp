@@ -87,7 +87,7 @@ def main():
     if os.path.exists("autofinal.py"):
         execute_with_loading("Making autofinal.py executable", "chmod +x autofinal.py")
         prefix_bin = os.path.join(os.environ["PREFIX"], "bin")
-        destination = os.path.join(prefix_bin, "autotrancribe")
+        destination = os.path.join(prefix_bin, "autotranscribe")
         try:
             os.rename("autofinal.py", destination)
             print(f"{GREEN}Moved autofinal.py to {destination}{RESET}")
