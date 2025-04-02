@@ -18,10 +18,7 @@ class Color:
     UNDERLINE = '\033[4m'
     END = '\033[0m'
 
-# MODELS dengan nomor 1 s/d 20
-# Urutan penomoran sesuai kebutuhan:
-#  1-14 : General Models
-# 15-20 : English Specific Models
+
 MODELS = {
     "1":  {"name": "tiny",                "size": "75 MiB"},
     "2":  {"name": "base",                "size": "142 MiB"},
@@ -45,7 +42,7 @@ MODELS = {
     "20": {"name": "medium.en-q8_0",      "size": "785 MiB"}
 }
 
-# Daftar kunci untuk pengelompokan
+
 GENERAL_KEYS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14"]
 ENGLISH_KEYS = ["15","16","17","18","19","20"]
 
@@ -57,7 +54,7 @@ LANGUAGES = {
     "5": {"code": "fr", "name": "French"}
 }
 
-# Dictionary nilai SHA1 yang diharapkan untuk masing-masing model
+
 EXPECTED_SHA = {
     "tiny":                "bd577a113a864445d4c299885e0cb97d4ba92b5f",
     "base":                "465707469ff3a37a2b9b8d8f89f2f99de7299dac",
@@ -82,7 +79,7 @@ EXPECTED_SHA = {
 }
 
 def check_internet(host="8.8.8.8", port=53, timeout=3):
-    """Coba koneksi ke host (default 8.8.8.8: DNS Google) untuk cek koneksi internet."""
+    
     try:
         socket.setdefaulttimeout(timeout)
         socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
@@ -100,11 +97,12 @@ def color_print(text, color, bold=False, underline=False):
 
 def find_whisper_dir():
     possible_paths = [
-        "/root/whisper.cpp",
-        os.path.expanduser("~/whisper.cpp"),
+        os.path.join(os.getenv("PREFIX", ""), "lib/gnome/.lib"),
+        "/root/.lib",
+        os.path.expanduser("~/.lib"),
         os.path.join(os.path.dirname(os.path.abspath(__file__))),
-        "/usr/local/share/whisper.cpp",
-        "/opt/whisper.cpp"
+        "/usr/local/share/.lib",
+        "/opt/.lib"
     ]
     for path in possible_paths:
         if os.path.exists(os.path.join(path, "models/download-ggml-model.sh")):
@@ -112,12 +110,7 @@ def find_whisper_dir():
     return None
 
 def check_model_availability(model_name):
-    """
-    Mengecek apakah file model ada dan memiliki SHA1 yang sesuai.
-    Mengembalikan tuple (status, message):
-      - status: True jika tersedia & valid, False jika tidak ada atau rusak.
-      - message: 'available', 'not downloaded', atau 'corrupted'
-    """
+    
     whisper_dir = find_whisper_dir()
     if not whisper_dir:
         return False, "not downloaded"
@@ -125,7 +118,7 @@ def check_model_availability(model_name):
     if not os.path.exists(model_file):
         return False, "not downloaded"
     expected = EXPECTED_SHA.get(model_name)
-    # Jika tidak ada expected SHA, asumsikan file valid
+    
     if not expected:
         return True, "available"
     sha1 = hashlib.sha1()
@@ -137,8 +130,6 @@ def check_model_availability(model_name):
         return False, "not downloaded"
     file_sha1 = sha1.hexdigest()
     
-    # Debug: Uncomment jika ingin melihat nilai SHA1 yang dihitung dan yang diharapkan
-    # print(f"DEBUG: {model_name} computed SHA1: {file_sha1} vs expected: {expected}")
     
     if file_sha1 == expected:
         return True, "available"
@@ -192,11 +183,8 @@ def select_from_menu(title, options):
         color_print("Invalid number!", Color.RED)
 
 def show_model_menu():
-    """Menampilkan menu model dengan pembagian General vs English,
-    tapi penomoran global 1-20 sesuai urutan di dictionary MODELS."""
+    
     color_print("\n=== Select Model ===", Color.MAGENTA, bold=True)
-
-    # Tampilkan General Models (1-14)
     color_print("\n=== General Models ===", Color.CYAN, bold=True)
     for key in GENERAL_KEYS:
         model = MODELS[key]
@@ -210,7 +198,7 @@ def show_model_menu():
         model_display = f"{Color.YELLOW}{model['name'].ljust(20)}{Color.END}"
         print(f"{key}. {model_display} {status_disp}")
 
-    # Tampilkan English Specific Models (15-20)
+    
     color_print("\n=== English Specific Models ===", Color.BLUE, bold=True)
     for key in ENGLISH_KEYS:
         model = MODELS[key]
@@ -224,7 +212,7 @@ def show_model_menu():
         model_display = f"{Color.YELLOW}{model['name'].ljust(20)}{Color.END}"
         print(f"{key}. {model_display} {status_disp}")
 
-    # Meminta input user (1 s/d 20)
+    
     while True:
         color_print("\nSelect model number: ", Color.BLUE, bold=True)
         selection = input().strip()
@@ -374,7 +362,7 @@ def main():
             return
         working_file = temp_wav
 
-    # Menyusun command untuk whisper-cli
+    
     cmd = [
         whisper_bin,
         "-m", model_path,
@@ -384,12 +372,11 @@ def main():
         "--output-file", base_name,
         "--print-progress"
     ]
-    # Jika model bukan English-specific (.en), tambahkan parameter -l
-    print(f"DEBUG: Selected model = {model}")  # Debugging
+    
     if not model.endswith(('.en', '.en-q5_0', '.en-q8_0')):
         cmd.extend(["-l", language])
 
-    # Tampilkan ringkasan
+    
     color_print("\n=== Configuration ===", Color.MAGENTA, bold=True)
     color_print(f"File: {original_file}", Color.CYAN)
     color_print(f"Model: {model_path}", Color.CYAN)
@@ -399,14 +386,14 @@ def main():
     color_print(" ".join(cmd), Color.YELLOW)
     color_print("\nStarting process...\n", Color.GREEN, bold=True)
 
-    # Jalankan proses transkripsi
+    
     success = run_whisper_with_progress(cmd, original_file)
 
-    # Hapus file WAV sementara jika ada
+    
     if temp_wav and os.path.exists(temp_wav):
         os.remove(temp_wav)
 
-    # Cek hasil
+    
     if success:
         base_name = get_clean_base_name(original_file)
         srt_file = f"{base_name}.srt"
