@@ -75,54 +75,23 @@ def main():
     
     print(f"{GREEN}Fish shell configured{RESET}")
 
-    # Membuat folder $PREFIX/lib/gnome/.lib/
-    whisper_path = os.path.join(os.getenv("PREFIX", ""), "lib/gnome/")
-    os.makedirs(whisper_path, exist_ok=True)
+    
 
-    # Mengunduh whisper.cpp ke dalam folder .lib
-    os.chdir(whisper_path)
+    
     execute_with_loading("Downloading Whisper", "git clone https://github.com/andromaxdroid/whisper.cpp.git")
 
-    # Mengganti nama folder whisper.cpp menjadi .lib
-    if os.path.exists("whisper.cpp"):
-        os.rename("whisper.cpp", ".lib")
-    else:
-        print(f"{YELLOW}whisper.cpp folder not found!{RESET}")
-        return
 
-    # Proses build whisper.cpp
-    whisper_dir = os.path.join(whisper_path, ".lib")
-    execute_with_loading("Running cmake build", "cmake -B build", cwd=whisper_dir)
-    execute_with_loading("Building config please wait a few minutes..", "cmake --build build --config Release", cwd=whisper_dir)
+    
+    whisper_dir = os.path.join(os.getenv("HOME"), "whisper.cpp")
+    
+    execute_with_loading("Building config please wait a few minutes..", "make", cwd=whisper_dir)
 
     print(f"{YELLOW}Testing whisper-cli help...{RESET}")
-    out, err = run_command("./build/bin/whisper-cli -h", cwd=whisper_dir)
+    out, err = run_command("$PREFIX/bin/whisper-cli -h", cwd=whisper_dir)
     print(out.decode())
 
-    # Tambahkan kode disini: set executable permission on models/download-ggml-model.sh
-    models_dir = os.path.join(whisper_dir, "models")
-    download_script = os.path.join(models_dir, "download-ggml-model.sh")
-    if os.path.exists(download_script):
-        execute_with_loading("Making download-ggml-model.sh executable", f"chmod +x {download_script}", cwd=models_dir)
-    else:
-        print(f"{YELLOW}download-ggml-model.sh not found in {models_dir}{RESET}")
 
     print(f"{GREEN}whisper ai has been installed{RESET}")
-
-    autofinal_path = os.path.join(whisper_dir, "autofinal.py")
-    
-    if os.path.exists(autofinal_path):
-        execute_with_loading("Making autofinal.py executable", f"chmod +x {autofinal_path}")
-        prefix_bin = os.path.join(os.environ["PREFIX"], "bin")
-        destination = os.path.join(prefix_bin, "autotranscribe")
-        
-        try:
-            os.rename(autofinal_path, destination)
-            
-        except Exception as e:
-            print(f"{YELLOW}Failed to create sub script: {e}{RESET}")
-    else:
-        print(f"{YELLOW}file not found in {autofinal_path}{RESET}")
 
     print(f"{GREEN}Now you can use \"autotrancribe\" in any folder containing audio or video files to transcribe them{RESET}")
 
