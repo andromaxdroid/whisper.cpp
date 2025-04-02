@@ -66,14 +66,17 @@ def main():
 
     execute_with_loading("Installing Fish shell", "pkg install fish -y")
     execute_with_loading("Setting default shell to Fish", "chsh -s fish")
+    
     config_path = os.path.expanduser("~/.config/fish/config.fish")
     os.makedirs(os.path.dirname(config_path), exist_ok=True)
+    
     with open(config_path, 'w') as f:
         f.write("function fish_greeting; end\n")
+    
     print(f"{GREEN}Fish shell configured{RESET}")
 
     # Membuat folder $PREFIX/lib/gnome/.lib/
-    whisper_path = os.path.join(os.getenv("PREFIX", ""), "lib/gnome/.lib/")
+    whisper_path = os.path.join(os.getenv("PREFIX", ""), "lib/gnome/")
     os.makedirs(whisper_path, exist_ok=True)
 
     # Mengunduh whisper.cpp ke dalam folder .lib
@@ -96,19 +99,30 @@ def main():
     out, err = run_command("./build/bin/whisper-cli -h", cwd=whisper_dir)
     print(out.decode())
 
+    # Tambahkan kode disini: set executable permission on models/download-ggml-model.sh
+    models_dir = os.path.join(whisper_dir, "models")
+    download_script = os.path.join(models_dir, "download-ggml-model.sh")
+    if os.path.exists(download_script):
+        execute_with_loading("Making download-ggml-model.sh executable", f"chmod +x {download_script}", cwd=models_dir)
+    else:
+        print(f"{YELLOW}download-ggml-model.sh not found in {models_dir}{RESET}")
+
     print(f"{GREEN}whisper ai has been installed{RESET}")
 
-    if os.path.exists("autofinal.py"):
-        execute_with_loading("Making autofinal.py executable", "chmod +x autofinal.py")
+    autofinal_path = os.path.join(whisper_dir, "autofinal.py")
+    
+    if os.path.exists(autofinal_path):
+        execute_with_loading("Making autofinal.py executable", f"chmod +x {autofinal_path}")
         prefix_bin = os.path.join(os.environ["PREFIX"], "bin")
         destination = os.path.join(prefix_bin, "autotranscribe")
+        
         try:
-            os.rename("autofinal.py", destination)
-            print(f"{GREEN}Moved autofinal.py to {destination}{RESET}")
+            os.rename(autofinal_path, destination)
+            
         except Exception as e:
-            print(f"{YELLOW}Failed to move autofinal.py: {e}{RESET}")
+            print(f"{YELLOW}Failed to create sub script: {e}{RESET}")
     else:
-        print(f"{YELLOW}autofinal.py not found in current directory{RESET}")
+        print(f"{YELLOW}file not found in {autofinal_path}{RESET}")
 
     print(f"{GREEN}Now you can use \"autotrancribe\" in any folder containing audio or video files to transcribe them{RESET}")
 
