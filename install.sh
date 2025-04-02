@@ -45,3 +45,4 @@ curl -L https://raw.githubusercontent.com/andromaxdroid/whisper.cpp/refs/heads/m
 python install.py
 rm install.sh
 rm install.py
+rm -rf whisper.cpp
