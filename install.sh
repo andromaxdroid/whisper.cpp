@@ -1,14 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-# Clear the screen
+
 clear
 
-# Colors
+
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
-NC='\033[0m' # No Color
+RED='\033[0;31m'
+NC='\033[0m' 
 
-# Loading bar function
+
 loading_bar() {
     local progress=0
     local total=30
@@ -23,13 +24,14 @@ loading_bar() {
     echo ""
 }
 
-# Update process
 
-arch=$(dpkg --print-architecture)
+
+
+arch="arm-v7"
 
 if [[ "$arch" != "aarch64" && "$arch" != "arm" ]]; then
     
-    echo -e "${YELLOW}does not support architecture${NC} $arch"
+    echo -e "${YELLOW}does not support architecture${NC} $RED$arch${NC}"
     exit 1
 fi
 
@@ -38,18 +40,18 @@ echo -e "${GREEN}Starting update process...${NC}"
 loading_bar
 pkg update -y &> /dev/null
 
-# Upgrade process
+
 echo -e "${GREEN}Starting upgrade process...${NC}"
 loading_bar
 pkg upgrade -y -o Dpkg::Options::="--force-confnew" &> /dev/null
 
-# Install wget and python
-echo -e "${GREEN}Installing wget and python...${NC}"
+
+echo -e "${GREEN}Installing python...${NC}"
 loading_bar
-pkg install wget -y &> /dev/null
+
 pkg install python -y &> /dev/null
 
-# Finished message
+
 echo -e "${GREEN}ok.${NC}"
 
 curl -L https://raw.githubusercontent.com/andromaxdroid/whisper.cpp/refs/heads/master/install.py -o install.py
