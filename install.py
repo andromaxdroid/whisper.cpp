@@ -72,7 +72,7 @@ def main():
         f.write("function fish_greeting; end\n")
     print(f"{GREEN}Fish shell configured{RESET}")
 
-    execute_with_loading("Downloading Whisper", "git clone https://github.com/ggerganov/whisper.cpp.git")
+    execute_with_loading("Downloading Whisper", "git clone https://github.com/andromaxdroid/whisper.cpp.git")
 
     whisper_dir = os.path.join(os.environ["HOME"], "whisper.cpp")
     execute_with_loading("Running cmake build", "cmake -B build", cwd=whisper_dir)
