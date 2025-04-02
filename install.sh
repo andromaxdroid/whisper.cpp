@@ -27,7 +27,7 @@ loading_bar() {
 
 
 
-arch="arm-v7"
+arch=$(dpkg --print-architecture)
 
 if [[ "$arch" != "aarch64" && "$arch" != "arm" ]]; then
     
