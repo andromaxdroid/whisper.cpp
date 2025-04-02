@@ -90,7 +90,7 @@ def main():
     # Proses build whisper.cpp
     whisper_dir = os.path.join(whisper_path, ".lib")
     execute_with_loading("Running cmake build", "cmake -B build", cwd=whisper_dir)
-    execute_with_loading("Building config please wait", "cmake --build build --config Release", cwd=whisper_dir)
+    execute_with_loading("Building config please wait a few minutes..", "cmake --build build --config Release", cwd=whisper_dir)
 
     print(f"{YELLOW}Testing whisper-cli help...{RESET}")
     out, err = run_command("./build/bin/whisper-cli -h", cwd=whisper_dir)
