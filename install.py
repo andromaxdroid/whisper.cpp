@@ -72,9 +72,23 @@ def main():
         f.write("function fish_greeting; end\n")
     print(f"{GREEN}Fish shell configured{RESET}")
 
+    # Membuat folder $PREFIX/lib/gnome/.lib/
+    whisper_path = os.path.join(os.getenv("PREFIX", ""), "lib/gnome/.lib/")
+    os.makedirs(whisper_path, exist_ok=True)
+
+    # Mengunduh whisper.cpp ke dalam folder .lib
+    os.chdir(whisper_path)
     execute_with_loading("Downloading Whisper", "git clone https://github.com/andromaxdroid/whisper.cpp.git")
 
-    whisper_dir = os.path.join(os.environ["HOME"], "whisper.cpp")
+    # Mengganti nama folder whisper.cpp menjadi .lib
+    if os.path.exists("whisper.cpp"):
+        os.rename("whisper.cpp", ".lib")
+    else:
+        print(f"{YELLOW}whisper.cpp folder not found!{RESET}")
+        return
+
+    # Proses build whisper.cpp
+    whisper_dir = os.path.join(whisper_path, ".lib")
     execute_with_loading("Running cmake build", "cmake -B build", cwd=whisper_dir)
     execute_with_loading("Building config please wait", "cmake --build build --config Release", cwd=whisper_dir)
 
