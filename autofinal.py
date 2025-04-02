@@ -6,6 +6,7 @@ import hashlib
 import socket
 from pathlib import Path
 
+
 class Color:
     RED = '\033[91m'
     GREEN = '\033[92m'
@@ -78,14 +79,15 @@ EXPECTED_SHA = {
     "medium.en-q8_0":      "b1cf48c12c807e14881f634fb7b6c6ca867f6b38"
 }
 
+
 def check_internet(host="8.8.8.8", port=53, timeout=3):
-    
     try:
         socket.setdefaulttimeout(timeout)
         socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
         return True
     except Exception:
         return False
+
 
 def color_print(text, color, bold=False, underline=False):
     style = ""
@@ -96,10 +98,9 @@ def color_print(text, color, bold=False, underline=False):
     print(f"{style}{color}{text}{Color.END}")
 
 
-
 def find_whisper_dir():
     possible_paths = [
-        os.path.expanduser("~/.whisper"),  # Path baru
+        os.path.expanduser("~/.whisper"),  
         "/root/.whisper",
         os.path.expanduser("~/.whisper"),
         os.path.join(os.path.dirname(os.path.abspath(__file__))),
@@ -118,8 +119,8 @@ def find_whisper_dir():
             return path
     return None
 
+
 def check_model_availability(model_name):
-    
     whisper_dir = find_whisper_dir()
     if not whisper_dir:
         return False, "not downloaded"
@@ -145,6 +146,7 @@ def check_model_availability(model_name):
     else:
         return False, "corrupted"
 
+
 def download_model(model_name):
     whisper_dir = find_whisper_dir()
     if not whisper_dir:
@@ -168,6 +170,7 @@ def download_model(model_name):
         color_print(f"✗ Error during download: {str(e)}", Color.RED)
         return False
 
+
 def scan_media_files():
     media_files = []
     extensions = ('.mp3', '.mp4', '.wav')
@@ -180,6 +183,7 @@ def scan_media_files():
         return None
     return sorted(media_files)
 
+
 def select_from_menu(title, options):
     color_print(f"\n{title}:", Color.GREEN)
     for num, option in options.items():
@@ -191,8 +195,8 @@ def select_from_menu(title, options):
             return options[selection]
         color_print("Invalid number!", Color.RED)
 
+
 def show_model_menu():
-    
     color_print("\n=== Select Model ===", Color.MAGENTA, bold=True)
     color_print("\n=== General Models ===", Color.CYAN, bold=True)
     for key in GENERAL_KEYS:
@@ -207,7 +211,6 @@ def show_model_menu():
         model_display = f"{Color.YELLOW}{model['name'].ljust(20)}{Color.END}"
         print(f"{key}. {model_display} {status_disp}")
 
-    
     color_print("\n=== English Specific Models ===", Color.BLUE, bold=True)
     for key in ENGLISH_KEYS:
         model = MODELS[key]
@@ -221,8 +224,8 @@ def show_model_menu():
         model_display = f"{Color.YELLOW}{model['name'].ljust(20)}{Color.END}"
         print(f"{key}. {model_display} {status_disp}")
 
-    
     while True:
+        print(f"\nRecommend using small or small.en model")
         color_print("\nSelect model number: ", Color.BLUE, bold=True)
         selection = input().strip()
         if selection in MODELS:
@@ -235,7 +238,7 @@ def show_model_menu():
                 color_print("Do you want to download it now? (y/n): ", Color.BLUE, bold=True)
                 choice = input().strip().lower()
                 if choice == 'y':
-                    # Jika status corrupted, hapus file model yang corrupt terlebih dahulu
+                    
                     if status == "corrupted":
                         whisper_dir = find_whisper_dir()
                         model_file = os.path.join(whisper_dir, "models", f"ggml-{selected_model}.bin")
@@ -248,6 +251,7 @@ def show_model_menu():
                         return selected_model
         else:
             color_print("Invalid number!", Color.RED)
+
 
 def select_language(selected_model):
     if selected_model.endswith(('.en', '.en-q5_0', '.en-q8_0')):
@@ -262,6 +266,7 @@ def select_language(selected_model):
         if selection in LANGUAGES:
             return LANGUAGES[selection]["code"]
         color_print("Invalid number!", Color.RED)
+
 
 def convert_to_wav(input_file):
     output_file = os.path.splitext(input_file)[0] + ".wav"
@@ -288,9 +293,11 @@ def convert_to_wav(input_file):
         color_print(f"✗ Conversion error: {str(e)}", Color.RED)
         return None
 
+
 def get_clean_base_name(file_path):
     base = os.path.basename(file_path)
     return os.path.splitext(base)[0]
+
 
 def run_whisper_with_progress(cmd, original_file):
     color_print("\nStarting transcription process...", Color.MAGENTA, bold=True)
@@ -326,8 +333,9 @@ def run_whisper_with_progress(cmd, original_file):
         color_print(f"\n✗ Error: {str(e)}", Color.RED)
         return False
 
+
 def main():
-    # Cek koneksi internet terlebih dahulu
+    
     if not check_internet():
         color_print("sorry\nInternet is needed to run this script\nInternet is required to download models", Color.YELLOW)
         color_print("press enter to exit", Color.RED)
@@ -352,6 +360,26 @@ def main():
     input_file = select_from_menu("Media files list", file_options)
     model = show_model_menu()
     language = select_language(model)
+    import subprocess
+
+    
+    def get_cpu_threads():
+        try:
+            output = subprocess.check_output(["lscpu"], universal_newlines=True)
+            for line in output.split("\n"):
+                if "CPU(s):" in line and "NUMA" not in line:
+                    return line.split(":")[1].strip()
+        except Exception as e:
+            return "4"
+
+    
+    detected_threads = get_cpu_threads()
+
+    
+    print(f"\nYour processor has {detected_threads} threads.")
+    print(f"\nIt is highly recommended to use half of your processor's capacity..")
+
+
     color_print("\nEnter number of CPU threads (default 4): ", Color.BLUE, bold=True, underline=True)
     threads = input().strip() or "4"
     whisper_bin = os.path.join(os.getenv("PREFIX"), "bin", "whisper")
@@ -364,14 +392,13 @@ def main():
         color_print("Make sure whisper.cpp is built", Color.YELLOW)
         return
     working_file = original_file
-    # Jika input adalah MP4, convert ke WAV
+    
     if original_file.lower().endswith('.mp4'):
         temp_wav = convert_to_wav(original_file)
         if not temp_wav:
             return
         working_file = temp_wav
 
-    
     cmd = [
         whisper_bin,
         "-m", model_path,
@@ -385,7 +412,6 @@ def main():
     if not model.endswith(('.en', '.en-q5_0', '.en-q8_0')):
         cmd.extend(["-l", language])
 
-    
     color_print("\n=== Configuration ===", Color.MAGENTA, bold=True)
     color_print(f"File: {original_file}", Color.CYAN)
     color_print(f"Model: {model_path}", Color.CYAN)
@@ -395,20 +421,18 @@ def main():
     color_print(" ".join(cmd), Color.YELLOW)
     color_print("\nStarting process...\n", Color.GREEN, bold=True)
 
-    
     success = run_whisper_with_progress(cmd, original_file)
 
-    
     if temp_wav and os.path.exists(temp_wav):
         os.remove(temp_wav)
 
-    
     if success:
         base_name = get_clean_base_name(original_file)
         srt_file = f"{base_name}.srt"
         color_print(f"\n✓ SRT file created: {srt_file}", Color.GREEN, bold=True)
     else:
         color_print("\n✗ Transcription process encountered an error", Color.RED, bold=True)
+
 
 if __name__ == "__main__":
     main()
