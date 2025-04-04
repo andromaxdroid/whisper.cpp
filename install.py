@@ -3,6 +3,7 @@ import subprocess
 import threading
 import itertools
 import sys
+import signal
 import time
 
 GREEN = "\033[92m"
@@ -42,11 +43,20 @@ def check_storage_access():
     storage_path = os.path.expanduser("~/storage/shared")
     return os.path.isdir(storage_path)
 
+def exit_termux():
+    
+    print(f"\n{CYAN}The Termux app needs to restart to make Whisper work{RED}")
+    sys.stdout.flush()
+    
+    parent_pid = os.getppid()
+    os.kill(parent_pid, signal.SIGKILL)
+    sys.exit(0)
+
 def main():
     os.system("clear")
     print(f"{GREEN}Whisper.cpp installer{RESET}")
 
-    # Pengecekan storage secara berulang hingga folder benar-benar ada
+    
     while not check_storage_access():
         print(f"{YELLOW}Setting up storage...{RESET}")
         print(f"{YELLOW}Please allow storage access in Termux, then press Enter to continue...{RESET}")
@@ -89,7 +99,7 @@ def main():
 
     print(f"{GREEN}whisper ai has been installed{RESET}")
     print(f"{GREEN}Now you can use {YELLOW}autotranscribe{GREEN} in any folder containing audio or video files to transcribe them{RESET}")
-
+    exit_termux ()
 if __name__ == "__main__":
     main()
 
