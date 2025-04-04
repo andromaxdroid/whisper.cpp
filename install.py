@@ -57,7 +57,7 @@ def main():
 
     execute_with_loading("Updating packages", "pkg update -y")
     
-    execute_with_loading("Installing dependencies cmake", "pkg install cmake ffmpeg git -y")
+    execute_with_loading("Installing dependencies cmake", "pkg install cmake -y")
     
     execute_with_loading("Installing dependencies fmpeg", "pkg install ffmpeg -y")
     
@@ -88,7 +88,7 @@ def main():
     print(out.decode())
 
     print(f"{GREEN}whisper ai has been installed{RESET}")
-    print(f"{GREEN}Now you can use \"autotranscribe\" in any folder containing audio or video files to transcribe them{RESET}")
+    print(f"{GREEN}Now you can use {YELLOW}autotranscribe{GREEN} in any folder containing audio or video files to transcribe them{RESET}")
 
 if __name__ == "__main__":
     main()
