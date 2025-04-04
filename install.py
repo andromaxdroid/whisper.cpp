@@ -54,6 +54,40 @@ def exit_termux():
     os.kill(parent_pid, signal.SIGKILL)
     sys.exit(0)
 
+def set_fish_prompt():
+    
+    config_dir = os.path.expanduser("~/.config/fish")
+    config_file = os.path.join(config_dir, "config.fish")
+
+    
+    os.makedirs(config_dir, exist_ok=True)
+
+    
+    fish_prompt_function = """function fish_prompt
+    set current_dir (prompt_pwd)
+    set last_folder (basename $current_dir)
+    set parent_path (dirname $current_dir)
+    
+    
+
+    if test $parent_path = "~"
+        echo -n "~"
+    else
+        echo -n "$parent_path"
+    end
+
+    set_color cyan
+    echo -n "$last_folder"
+    set_color normal
+    echo -n " : "
+end
+function fish_greeting; end\n
+"""
+
+    
+    with open(config_file, "w") as f:
+        f.write(fish_prompt_function)
+
 def main():
     os.system("clear")
     print(f"{GREEN}Whisper.cpp installer{RESET}")
@@ -81,11 +115,7 @@ def main():
     execute_with_loading("Installing Fish shell", "pkg install fish -y")
     execute_with_loading("Setting default shell to Fish", "chsh -s fish")
     
-    config_path = os.path.expanduser("~/.config/fish/config.fish")
-    os.makedirs(os.path.dirname(config_path), exist_ok=True)
-    
-    with open(config_path, 'w') as f:
-        f.write("function fish_greeting; end\n")
+    set_fish_prompt()
     
     print(f"{GREEN}Fish shell configured{RESET}")
     
