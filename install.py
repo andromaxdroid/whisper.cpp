@@ -11,14 +11,12 @@ RESET = "\033[0m"
 
 loading_done = False
 
-
 def run_command(command, cwd=None):
     process = subprocess.Popen(command, shell=True, cwd=cwd,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
     out, err = process.communicate()
     return out, err
-
 
 def loading_animation(message):
     for frame in itertools.cycle(['|', '/', '-', '\\']):
@@ -27,7 +25,6 @@ def loading_animation(message):
         sys.stdout.write(f'\r{YELLOW}{message} {frame}{RESET}')
         sys.stdout.flush()
         time.sleep(0.1)
-
 
 def execute_with_loading(message, command, cwd=None):
     global loading_done
@@ -41,26 +38,31 @@ def execute_with_loading(message, command, cwd=None):
     loading_thread.join()
     sys.stdout.write(f'\r{GREEN}{message} Done!{RESET}\n')
 
-
 def check_storage_access():
     storage_path = os.path.expanduser("~/storage/shared")
     return os.path.isdir(storage_path)
-
 
 def main():
     os.system("clear")
     print(f"{GREEN}Whisper.cpp installer{RESET}")
 
-    if not check_storage_access():
+    # Pengecekan storage secara berulang hingga folder benar-benar ada
+    while not check_storage_access():
         print(f"{YELLOW}Setting up storage...{RESET}")
         print(f"{YELLOW}Please allow storage access in Termux, then press Enter to continue...{RESET}")
         os.system("termux-setup-storage")
         input(f"{YELLOW}Press Enter after granting permission...{RESET}")
-    else:
-        print(f"{GREEN}Storage access already granted. Skipping termux-setup-storage.{RESET}")
+    
+    print(f"{GREEN}Storage access granted successfully.{RESET}")
 
     execute_with_loading("Updating packages", "pkg update -y")
-    execute_with_loading("Installing dependencies (cmake, ffmpeg, git)", "pkg install cmake ffmpeg git -y")
+    
+    execute_with_loading("Installing dependencies cmake", "pkg install cmake ffmpeg git -y")
+    
+    execute_with_loading("Installing dependencies fmpeg", "pkg install ffmpeg -y")
+    
+    execute_with_loading("Installing dependencies git", "pkg install git -y")
+    
 
     os.chdir(os.environ["HOME"])
 
@@ -74,13 +76,8 @@ def main():
         f.write("function fish_greeting; end\n")
     
     print(f"{GREEN}Fish shell configured{RESET}")
-
-    
-
     
     execute_with_loading("Downloading Whisper", "git clone https://github.com/andromaxdroid/whisper.cpp.git")
-
-
     
     whisper_dir = os.path.join(os.getenv("HOME"), "whisper.cpp")
     
@@ -90,11 +87,9 @@ def main():
     out, err = run_command("$PREFIX/bin/whisper-cli -h", cwd=whisper_dir)
     print(out.decode())
 
-
     print(f"{GREEN}whisper ai has been installed{RESET}")
-
     print(f"{GREEN}Now you can use \"autotranscribe\" in any folder containing audio or video files to transcribe them{RESET}")
-
 
 if __name__ == "__main__":
     main()
+
