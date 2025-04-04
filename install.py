@@ -93,7 +93,7 @@ def main():
 
     print(f"{GREEN}whisper ai has been installed{RESET}")
 
-    print(f"{GREEN}Now you can use \"autotrancribe\" in any folder containing audio or video files to transcribe them{RESET}")
+    print(f"{GREEN}Now you can use \"autotranscribe\" in any folder containing audio or video files to transcribe them{RESET}")
 
 
 if __name__ == "__main__":
