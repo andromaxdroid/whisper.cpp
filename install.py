@@ -48,6 +48,7 @@ def check_storage_access():
 def exit_termux():
     
     print(f"\n{CYAN}The Termux app needs to restart to make Whisper work{RED}")
+    #exit
     
 
 def set_fish_prompt():
