@@ -96,7 +96,12 @@ function transcript_menu () {
     ls models/*.bin | nl -w2 -s'. '
     echo -e "${yellow}Enter the number of the model to use:${reset}"
     read model_number
+    echo -e "${yellow}Enter the thread count (default 4):${reset}"
+    read thread_count
+    thread_count=${thread_count:-4} # default to 4 if empty
+    
     #./build/bin/whisper-cli -m models/selected_model.bin -f file.mp3/wav -l (languange en/id) -osrt
+    #-t N,      --threads N            [4      ] number of threads to use during computation
     selected_model=$(ls models/*.bin | sed -n "${model_number}p")
     if [ -z "$selected_model" ]; then
         echo -e "${red}Invalid selection. Exiting.${reset}"
@@ -108,9 +113,9 @@ function transcript_menu () {
     echo -e "${yellow}Enter the language code (e.g., en for English, id for Indonesian) or leave blank for auto-detect:${reset}"
     read language_code
     if [ -z "$language_code" ]; then
-        ./build/bin/whisper-cli -m "$selected_model" -f "$audio_file" -osrt 
+        ./build/bin/whisper-cli -m "$selected_model" -f "$audio_file" -osrt -t $thread_count
     else
-        ./build/bin/whisper-cli -m "$selected_model" -f "$audio_file" -l "$language_code" -osrt
+        ./build/bin/whisper-cli -m "$selected_model" -f "$audio_file" -l "$language_code" -osrt -t $thread_count
     fi
 
 
