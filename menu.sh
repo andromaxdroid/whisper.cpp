@@ -11,7 +11,8 @@ cyan='\033[0;36m'
 blue='\033[0;34m'
 reset='\e[0m'
 
-OUTPUT_DIR="output"
+working_dir=$(pwd)
+audio_files="$working_dir/*.wav"
 
 
 function download_model () {
@@ -90,36 +91,75 @@ function download_model () {
 }
 
 function transcript_menu () {
-    echo -e "${green} please select an model to transcribe with:${reset}"
-    #read list model from models/*.bin
+    echo -e "${green}Please select a model to transcribe with:${reset}"
+
     echo -e "${yellow}Available models:${reset}"
     ls models/*.bin | nl -w2 -s'. '
+
     echo -e "${yellow}Enter the number of the model to use:${reset}"
     read model_number
+
     echo -e "${yellow}Enter the thread count (default 4):${reset}"
     read thread_count
-    thread_count=${thread_count:-4} # default to 4 if empty
-    
-    #./build/bin/whisper-cli -m models/selected_model.bin -f file.mp3/wav -l (languange en/id) -osrt
-    #-t N,      --threads N            [4      ] number of threads to use during computation
+    thread_count=${thread_count:-4}
+
     selected_model=$(ls models/*.bin | sed -n "${model_number}p")
     if [ -z "$selected_model" ]; then
-        echo -e "${red}Invalid selection. Exiting.${reset}"
-        exit 1
+        echo -e "${red}Invalid model selection. Exiting.${reset}"
+        return 1
     fi
-    echo -e "${green}You have selected model: ${selected_model}${reset}"
-    echo -e "${yellow}Enter the path to the audio file to transcribe:${reset}"
-    read audio_file
-    echo -e "${yellow}Enter the language code (e.g., en for English, id for Indonesian) or leave blank for auto-detect:${reset}"
+
+    echo -e "${green}You selected model: ${selected_model}${reset}"
+    echo
+
+    # ===== LIST AUDIO FILES =====
+    echo -e "${yellow}Available audio files (.wav / .mp3):${reset}"
+
+    mapfile -t audio_files < <(ls *.wav *.mp3 2>/dev/null)
+
+    if [ ${#audio_files[@]} -eq 0 ]; then
+        echo -e "${red}No .wav or .mp3 files found in current directory.${reset}"
+        return 1
+    fi
+
+    for i in "${!audio_files[@]}"; do
+        printf "%2d. %s\n" $((i+1)) "${audio_files[$i]}"
+    done
+
+    echo
+    echo -e "${yellow}Enter the number of the audio file:${reset}"
+    read audio_number
+
+    audio_file="${audio_files[$((audio_number-1))]}"
+
+    if [ -z "$audio_file" ]; then
+        echo -e "${red}Invalid audio selection. Exiting.${reset}"
+        return 1
+    fi
+
+    echo -e "${green}You selected audio: ${audio_file}${reset}"
+    echo
+
+    # ===== LANGUAGE =====
+    echo -e "${yellow}Enter the language code (e.g., en, id) or leave blank for auto-detect:${reset}"
     read language_code
+
     if [ -z "$language_code" ]; then
-        ./build/bin/whisper-cli -m "$selected_model" -f "$audio_file" -osrt -t $thread_count
+        ./build/bin/whisper-cli \
+            -m "$selected_model" \
+            -f "$audio_file" \
+            -osrt \
+            -t "$thread_count"
     else
-        ./build/bin/whisper-cli -m "$selected_model" -f "$audio_file" -l "$language_code" -osrt -t $thread_count
+        ./build/bin/whisper-cli \
+            -m "$selected_model" \
+            -f "$audio_file" \
+            -l "$language_code" \
+            -osrt \
+            -t "$thread_count"
     fi
-
-
 }
+
 
 function read_user(){
     echo -e "${green}PLEASE SELECT AN OPTION:${reset}"
